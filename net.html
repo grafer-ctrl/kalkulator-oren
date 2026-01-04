@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Net Profit Kalkulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #FFB786 0%, #FF8675 100%);
+            --accent-color: #FF6B6B;
+            --bg-color: #FFF9F4;
+            --card-bg: #FFFFFF;
+            --text-dark: #333333;
+            --text-light: #888888;
+            --shadow-soft: 0 10px 30px rgba(255, 126, 95, 0.15);
+            --danger-color: #FF4757;
+            --success-color: #2ECC71;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--bg-color);
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 450px) {
+            .app-container {
+                border-radius: 40px;
+                height: 90vh;
+                margin: 20px;
+                overflow: hidden;
+            }
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--primary-gradient);
+            padding: 30px 25px 40px 25px;
+            color: white;
+            flex-shrink: 0;
+            border-bottom-left-radius: 35px;
+            border-bottom-right-radius: 35px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            text-decoration: none;
+            transition: transform 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .icon-btn:active { transform: scale(0.9); }
+        .icon-btn svg { stroke: white; width: 18px; height: 18px; }
+
+        .header-title h1 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+        .header-title p { font-size: 13px; opacity: 0.9; }
+
+        .status-badge {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.25);
+            font-weight: 700;
+        }
+
+        /* CONTENT */
+        .content-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+            margin-top: -30px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-scroll-area::-webkit-scrollbar { width: 0px; }
+        .content-inner { padding: 0 20px; }
+
+        /* CARDS */
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 15px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        /* RESULT DISPLAY */
+        .result-display {
+            background-color: #FFF0EB;
+            border-radius: 16px;
+            height: 60px;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-bar {
+            background: linear-gradient(90deg, #FF6B6B 0%, #FF8E53 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+            border-radius: 16px;
+            position: absolute;
+            left: 0; top: 0; z-index: 1;
+        }
+        
+        .result-bar.profit { background: var(--success-color); }
+        .result-bar.loss { background: var(--danger-color); }
+
+        .net-profit-text {
+            position: absolute;
+            right: 20px;
+            z-index: 2;
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 20px;
+            white-space: nowrap;
+            transition: color 0.3s;
+        }
+        
+        .net-profit-text.profit { color: var(--success-color); }
+        .net-profit-text.loss { color: var(--danger-color); }
+        .text-white-contrast { color: white !important; text-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+
+        /* STATS */
+        .stats-row { display: flex; justify-content: space-around; text-align: center; }
+        .stat-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        
+        .circle-chart {
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: #FFF0EB;
+            transition: background 0.3s;
+        }
+        .circle-inner {
+            width: 50px; height: 50px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: #555;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        .small-unit { font-size: 8px; font-weight: 400; color: #999; }
+        .stat-label { font-size: 11px; color: var(--text-light); margin-top: 5px;}
+
+        /* INPUTS */
+        .input-card-group { display: flex; flex-direction: column; gap: 12px; }
+        .input-box {
+            background-color: #FFF6F0; border-radius: 16px; padding: 15px;
+            border: 1px solid transparent; transition: border-color 0.3s;
+        }
+        .input-box:focus-within { border-color: #FFB786; }
+        .input-label { font-size: 12px; color: var(--text-light); margin-bottom: 5px; display: block; }
+        .input-row { display: flex; align-items: center; justify-content: space-between; }
+        
+        .currency-symbol, .percent-symbol { font-weight: 600; color: var(--text-dark); font-size: 16px; }
+        .modern-input {
+            width: 100%; background: transparent; border: none;
+            text-align: right; font-size: 16px; font-weight: 600;
+            color: var(--text-dark); outline: none; padding: 0 10px;
+        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .divider-text {
+            font-size: 12px; font-weight: 600; color: var(--accent-color);
+            margin: 5px 0; padding-left: 5px;
+        }
+        
+        .helper-text {
+            font-size: 10px; color: #FF8675; margin-top: 5px; text-align: right;
+        }
+
+        /* Animation */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: slideUp 0.4s ease-out forwards; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="nav-top">
+                <a href="index.html" class="icon-btn">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>
+                </a>
+                
+                <div class="icon-btn" style="opacity:0.8; cursor:default;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+            </div>
+            
+            <div class="header-title">
+                <h1>Net Profit Kalkulator</h1>
+                <p>Cek Saldo Cuan Akhir</p>
+                <span class="status-badge" id="statusBadge">Status: Menghitung...</span>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content-scroll-area">
+            <div class="content-inner">
+                
+                <!-- Result Section -->
+                <div class="card fade-in" style="animation-delay: 0.1s;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF9A62" stroke="none"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/></svg>
+                            Laba Bersih Akhir
+                        </div>
+                    </div>
+
+                    <!-- Net Profit Display -->
+                    <div class="result-display">
+                        <div class="result-bar" id="resultBar"></div>
+                        <span class="net-profit-text" id="netProfitText">Rp 0</span>
+                    </div>
+
+                    <div class="stats-row">
+                        <!-- Stat 1: Unit Profit -->
+                        <div class="stat-item">
+                            <div class="circle-chart" style="background: conic-gradient(#FF9F43 100%, #FFE5D9 0%);">
+                                <div class="circle-inner">
+                                    <span id="unitProfitText">0k</span>
+                                    <span class="small-unit">/Unit</span>
+                                </div>
+                            </div>
+                            <span class="stat-label">Laba/Unit</span>
+                        </div>
+                        
+                        <!-- Stat 2: Gross Profit -->
+                        <div class="stat-item">
+                            <div class="circle-chart" style="background: conic-gradient(#FF6B6B 100%, #FFE5D9 0%);">
+                                <div class="circle-inner">
+                                    <span id="grossProfitText">0k</span>
+                                    <span class="small-unit">Kotor</span>
+                                </div>
+                            </div>
+                            <span class="stat-label">Total Kotor</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Section -->
+                <div class="card fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF9A62" stroke="none"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z"/></svg>
+                            Detail Produk & Penjualan
+                        </div>
+                    </div>
+
+                    <div class="input-card-group">
+                        
+                        <div class="divider-text">Langkah 1: Per Unit</div>
+
+                        <!-- Harga Jual -->
+                        <div class="input-box">
+                            <label class="input-label">Harga Jual (Per Unit)</label>
+                            <div class="input-row">
+                                <span class="currency-symbol">Rp</span>
+                                <input type="number" id="priceInput" class="modern-input" placeholder="100000" inputmode="numeric">
+                            </div>
+                        </div>
+
+                        <!-- HPP -->
+                        <div class="input-box">
+                            <label class="input-label">HPP / Modal (Per Unit)</label>
+                            <div class="input-row">
+                                <span class="currency-symbol">Rp</span>
+                                <input type="number" id="hppInput" class="modern-input" placeholder="60000" inputmode="numeric">
+                            </div>
+                        </div>
+
+                        <!-- Biaya Admin (%) -->
+                        <div class="input-box">
+                            <label class="input-label">Biaya Admin Marketplace (%)</label>
+                            <div class="input-row">
+                                <span class="percent-symbol">%</span>
+                                <input type="number" id="adminPercentInput" class="modern-input" placeholder="5.0" step="0.1" inputmode="decimal">
+                            </div>
+                            <div class="helper-text">
+                                Potongan: <span id="adminNominalText">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <div class="divider-text" style="margin-top:10px;">Langkah 2 & 3: Total Penjualan</div>
+
+                        <!-- Qty -->
+                        <div class="input-box">
+                            <label class="input-label">Jumlah Terjual (Pcs)</label>
+                            <div class="input-row">
+                                <span class="currency-symbol" style="font-size:14px; color:#888;">Qty</span>
+                                <input type="number" id="qtyInput" class="modern-input" placeholder="10" inputmode="numeric">
+                            </div>
+                        </div>
+
+                        <!-- Biaya Iklan (Modal) -->
+                        <div class="input-box">
+                            <label class="input-label">Total Modal Iklan</label>
+                            <div class="input-row">
+                                <span class="currency-symbol">Rp</span>
+                                <input type="number" id="adsInput" class="modern-input" placeholder="200000" inputmode="numeric">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const priceInput = document.getElementById('priceInput');
+        const hppInput = document.getElementById('hppInput');
+        const adminPercentInput = document.getElementById('adminPercentInput');
+        const adminNominalText = document.getElementById('adminNominalText');
+        const qtyInput = document.getElementById('qtyInput');
+        const adsInput = document.getElementById('adsInput');
+
+        const netProfitText = document.getElementById('netProfitText');
+        const resultBar = document.getElementById('resultBar');
+        const unitProfitText = document.getElementById('unitProfitText');
+        const grossProfitText = document.getElementById('grossProfitText');
+        const statusBadge = document.getElementById('statusBadge');
+
+        // Formatter Mata Uang
+        const formatRupiah = (num) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+        };
+        
+        // Formatter Singkat (10k, 1.2jt)
+        const formatCompact = (num) => {
+            if(Math.abs(num) >= 1000000) return (num/1000000).toFixed(1) + 'jt';
+            if(Math.abs(num) >= 1000) return (num/1000).toFixed(0) + 'k';
+            return num;
+        };
+
+        function calculate() {
+            // 1. Ambil Nilai
+            let price = parseFloat(priceInput.value) || 0;
+            let hpp = parseFloat(hppInput.value) || 0;
+            let adminPct = parseFloat(adminPercentInput.value) || 0;
+            let qty = parseFloat(qtyInput.value) || 0;
+            let ads = parseFloat(adsInput.value) || 0;
+
+            // Hitung Nominal Admin (Harga Jual x Persen Admin)
+            let adminNominal = price * (adminPct / 100);
+            
+            // Tampilkan nominal admin di helper text
+            adminNominalText.innerText = formatRupiah(adminNominal);
+
+            // 2. Langkah 1: Hitung Laba per Produk
+            // Rumus: Harga Jual - HPP - Admin Nominal
+            let unitProfit = price - hpp - adminNominal;
+
+            // 3. Langkah 2: Hitung Total Laba Kotor
+            // Rumus: Laba per Produk x Jumlah Terjual
+            let totalGrossProfit = unitProfit * qty;
+
+            // 4. Langkah 3: Hitung Laba Bersih Akhir
+            // Rumus: Total Laba Kotor - Modal Iklan
+            let netProfit = totalGrossProfit - ads;
+
+            // --- Update UI ---
+
+            // Update Text Utama
+            netProfitText.innerText = formatRupiah(netProfit);
+            
+            // Update Stat Circles
+            unitProfitText.innerText = formatCompact(unitProfit);
+            grossProfitText.innerText = formatCompact(totalGrossProfit);
+
+            // Visual Logic (Warna & Status)
+            resultBar.className = 'result-bar'; // Reset class
+            netProfitText.className = 'net-profit-text'; // Reset class
+            
+            if (netProfit > 0) {
+                // UNTUNG / CUAN
+                statusBadge.innerText = "Status: CUAN (Profit)";
+                resultBar.classList.add('profit');
+                netProfitText.classList.add('profit');
+                
+                // Kalkulasi lebar bar (Visual)
+                let totalRevenue = price * qty;
+                let visualPercent = 0;
+                if(totalRevenue > 0) {
+                     visualPercent = (netProfit / totalRevenue) * 100 * 2; 
+                }
+                if(visualPercent > 100) visualPercent = 100;
+                resultBar.style.width = visualPercent + "%";
+                
+                // Contrast Text
+                if(visualPercent > 70) netProfitText.classList.add('text-white-contrast');
+
+            } else if (netProfit < 0) {
+                // RUGI / BONCOS
+                statusBadge.innerText = "Status: BONCOS (Rugi)";
+                resultBar.classList.add('loss');
+                netProfitText.classList.add('loss');
+                
+                // Bar tetap muncul sedikit untuk indikator merah
+                resultBar.style.width = "40%"; 
+                netProfitText.classList.add('text-white-contrast');
+            
+            } else {
+                // IMPAS / BEP / Input Kosong
+                if(price === 0) {
+                    statusBadge.innerText = "Status: Menunggu Data...";
+                    resultBar.style.width = "0%";
+                } else {
+                    statusBadge.innerText = "Status: IMPAS (BEP)";
+                    resultBar.style.width = "5%"; 
+                }
+            }
+        }
+
+        // Event Listeners
+        [priceInput, hppInput, adminPercentInput, qtyInput, adsInput].forEach(input => {
+            input.addEventListener('input', calculate);
+        });
+
+        // Set Default Values (Sesuai contoh soal Anda)
+        priceInput.value = 100000;
+        hppInput.value = 60000;
+        adminPercentInput.value = 5.0; // 5%
+        qtyInput.value = 10;
+        adsInput.value = 200000;
+        
+        // Run first calculation
+        calculate();
+
+    </script>
+</body>
+</html>

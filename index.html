@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kalkulator Oren Modern</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette Modern Oren */
+            --primary-orange: #FF6B4A;
+            --soft-orange: #FFF2EE;
+            --gradient-orange: linear-gradient(135deg, #FF8E71 0%, #FF6B4A 100%);
+            
+            /* Background & Surface */
+            --bg-body: #F4F6F9;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --card-shadow: 0 12px 30px rgba(223, 115, 87, 0.08);
+            --card-shadow-hover: 0 15px 35px rgba(223, 115, 87, 0.15);
+            
+            /* Text */
+            --text-main: #2D3436;
+            --text-sub: #9EA5B1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif; /* Font modern yang sedang tren */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #F0F2F5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Mobile Container - iPhone Style */
+        .app-container {
+            width: 100%;
+            max-width: 414px; /* Lebar standar HP modern */
+            background-color: #FAFAFA;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 450px) {
+            .app-container {
+                height: 92vh;
+                border-radius: 45px; /* Super rounded corners */
+                border: 8px solid #FFF; /* Bezel look */
+                overflow: hidden;
+            }
+        }
+
+        /* HEADER SECTION */
+        .header {
+            padding: 50px 25px 30px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent;
+            z-index: 10;
+        }
+
+        .header-text h3 {
+            font-size: 14px;
+            color: var(--text-sub);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-text h1 {
+            font-size: 26px;
+            color: var(--text-main);
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .header-text h1 span {
+            color: var(--primary-orange);
+        }
+
+        .profile-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .profile-btn:active { transform: scale(0.95); }
+
+        /* CONTENT AREA */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 25px 40px 25px;
+            /* Hide Scrollbar */
+            scrollbar-width: none; 
+        }
+        .content-area::-webkit-scrollbar { display: none; }
+
+        /* SECTION LABEL */
+        .section-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label::before {
+            content: '';
+            width: 4px; height: 16px;
+            background: var(--primary-orange);
+            border-radius: 4px;
+        }
+
+        /* GRID SYSTEM */
+        .grid-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        /* MODERN CARD STYLE */
+        .menu-card {
+            background: white;
+            border-radius: 28px;
+            padding: 22px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Align Left terlihat lebih modern */
+            justify-content: space-between;
+            aspect-ratio: 1 / 1.1;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid rgba(255,255,255,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Hover/Active State */
+        .menu-card:active {
+            transform: scale(0.96);
+            box-shadow: 0 5px 15px rgba(223, 115, 87, 0.1);
+        }
+
+        /* Icon Container */
+        .icon-container {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            /* Default Gradient */
+            background: var(--soft-orange); 
+            color: var(--primary-orange);
+            transition: 0.3s;
+        }
+
+        .icon-container svg {
+            width: 26px;
+            height: 26px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+        }
+
+        /* Card Text */
+        .card-info h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .card-info p {
+            font-size: 11px;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        /* Decorative Arrow */
+        .arrow-icon {
+            position: absolute;
+            top: 22px;
+            right: 22px;
+            opacity: 0.2;
+            transition: 0.3s;
+        }
+        .menu-card:active .arrow-icon {
+            opacity: 1;
+            transform: translateX(3px);
+            color: var(--primary-orange);
+        }
+
+        /* VARIATIONS (Sedikit nuansa warna berbeda tiap kartu agar tidak bosan) */
+        
+        /* 1. Affiliate - Orange */
+        .card-1 .icon-container { background: #FFF2EE; color: #FF6B4A; }
+        
+        /* 2. Dropship - Blueish (tapi warm) */
+        .card-2 .icon-container { background: #ECF2FF; color: #5B8EFF; }
+        
+        /* 3. ROAS - Greenish */
+        .card-3 .icon-container { background: #E9FBF0; color: #2ECC71; }
+        
+        /* 4. Net Profit - Purpleish */
+        .card-4 .icon-container { background: #F4F0FF; color: #8E44AD; }
+        
+        /* 5. BEP - Yellowish */
+        .card-5 .icon-container { background: #FFF9E6; color: #F1C40F; }
+        
+        /* 6. Discount - Pinkish */
+        .card-6 .icon-container { background: #FFF0F6; color: #E84393; }
+
+
+        /* BOTTOM DECORATION (Modern Tab Bar look-alike) */
+        .bottom-decoration {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to top, #ffffff 40%, rgba(255,255,255,0));
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Animation */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate { animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-text">
+                <h3>Dashboard</h3>
+                <h1>Kalkulator<br><span>Oren Pro.</span></h1>
+            </div>
+            <div class="profile-btn">
+                <!-- User Icon Modern -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2D3436" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content-area">
+            
+            <div class="section-label">Menu Utama</div>
+
+            <!-- GRID MENU -->
+            <div class="grid-menu">
+                
+                <!-- 1. Affiliate -->
+                <a href="afi.html" class="menu-card card-1 animate" style="animation-delay: 0.05s;">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <div class="card-info">
+                        <h4>Affiliate</h4>
+                        <p>Hitung Komisi</p>
+                    </div>
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+
+                <!-- 2. Dropship -->
+                <a href="dropship.html" class="menu-card card-2 animate" style="animation-delay: 0.1s;">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    </div>
+                    <div class="card-info">
+                        <h4>Dropship</h4>
+                        <p>Laba & Admin</p>
+                    </div>
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+
+                <!-- 3. Kalkulator BEP -->
+                <a href="bep.html" class="menu-card card-3 animate" style="animation-delay: 0.15s;">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+                    </div>
+                    <div class="card-info">
+                        <h4>BEP Kalkulator</h4>
+                        <p>Titik Impas</p>
+                    </div>
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+
+                <!-- 4. Net Profit -->
+                <a href="net.html" class="menu-card card-4 animate" style="animation-delay: 0.2s;">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                    </div>
+                    <div class="card-info">
+                        <h4>Net Profit/Laba Bersih</h4>
+                        <p>Saldo Cuan</p>
+                    </div>
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+
+                <!-- 5. BEP -->
+                <a href="grow.html" class="menu-card card-5 animate" style="animation-delay: 0.25s;">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    </div>
+                    <div class="card-info">
+                        <h4>Sales Growth</h4>
+                        <p>Analisa Pertumbuhan</p>
+                    </div>
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+
+                <!-- 6. Diskon -->
+                <a href="atc.html" class="menu-card card-6 animate" style="animation-delay: 0.3s;">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                    </div>
+                    <div class="card-info">
+                        <h4>Probabilitas order</h4>
+                        <p>Konversi Keranjang</p>
+                    </div>
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+
+            </div>
+            
+            <!-- Ruang kosong bawah untuk scroll nyaman -->
+            <div style="height: 50px;"></div>
+        </div>
+
+        <!-- Hiasan Bawah -->
+        <div class="bottom-decoration"></div>
+    </div>
+
+</body>
+</html>

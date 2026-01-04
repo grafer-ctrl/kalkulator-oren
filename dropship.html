@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kalkulator Dropship Final</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #FFB786 0%, #FF8675 100%);
+            --accent-color: #FF6B6B;
+            --bg-color: #FFF9F4;
+            --card-bg: #FFFFFF;
+            --text-dark: #333333;
+            --text-light: #888888;
+            --shadow-soft: 0 10px 30px rgba(255, 126, 95, 0.15);
+            --danger-color: #FF4757;
+            --success-color: #2ECC71;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--bg-color);
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 450px) {
+            .app-container {
+                border-radius: 40px;
+                height: 90vh;
+                margin: 20px;
+                overflow: hidden;
+            }
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--primary-gradient);
+            padding: 30px 25px 40px 25px;
+            color: white;
+            flex-shrink: 0;
+            border-bottom-left-radius: 35px;
+            border-bottom-right-radius: 35px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            text-decoration: none;
+            transition: transform 0.2s, background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+        .icon-btn svg { stroke: white; width: 18px; height: 18px; }
+
+        .header-title h1 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+        .header-title p { font-size: 13px; opacity: 0.9; }
+
+        /* Badge Mode */
+        .mode-badge {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.25);
+            font-weight: 600;
+        }
+
+        /* CONTENT */
+        .content-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+            margin-top: -30px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-scroll-area::-webkit-scrollbar { width: 0px; }
+        .content-inner { padding: 0 20px; }
+
+        /* CARDS */
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 15px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        /* RESULT DISPLAY */
+        .result-display {
+            background-color: #FFF0EB;
+            border-radius: 16px;
+            height: 55px;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-bar {
+            background: linear-gradient(90deg, #FF6B6B 0%, #FF8E53 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 16px;
+            position: absolute;
+            left: 0; top: 0; z-index: 1;
+        }
+        
+        /* Bar merah jika rugi */
+        .result-bar.loss { background: var(--danger-color); }
+
+        .total-text {
+            position: absolute;
+            right: 20px;
+            z-index: 2;
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 18px;
+            white-space: nowrap;
+            transition: color 0.3s;
+        }
+        .total-text.loss { color: var(--danger-color); }
+        .text-white-contrast { color: white !important; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+        /* STATS */
+        .stats-row { display: flex; justify-content: space-around; text-align: center; }
+        .stat-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        
+        .circle-chart {
+            width: 55px; height: 55px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: conic-gradient(var(--accent-color) 0%, #FFE5D9 0%);
+            transition: background 0.3s;
+        }
+        .circle-inner {
+            width: 42px; height: 42px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: var(--accent-color);
+        }
+        .stat-label { font-size: 11px; color: var(--text-light); }
+
+        /* INPUTS */
+        .input-card-group { display: flex; flex-direction: column; gap: 12px; }
+        .input-box {
+            background-color: #FFF6F0; border-radius: 16px; padding: 15px;
+            border: 1px solid transparent; transition: border-color 0.3s;
+        }
+        .input-box:focus-within { border-color: #FFB786; }
+        .input-label { font-size: 12px; color: var(--text-light); margin-bottom: 5px; display: block; }
+        .input-row { display: flex; align-items: center; justify-content: space-between; }
+        
+        /* Helper text for Admin Fee */
+        .input-helper {
+            font-size: 10px;
+            color: #FF8675;
+            margin-top: 5px;
+            font-style: italic;
+            line-height: 1.3;
+        }
+
+        .currency-symbol, .percent-symbol { font-weight: 600; color: var(--text-dark); font-size: 16px; }
+        .modern-input {
+            width: 100%; background: transparent; border: none;
+            text-align: right; font-size: 18px; font-weight: 600;
+            color: var(--text-dark); outline: none; padding: 0 10px;
+        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .final-result-box { 
+            background: linear-gradient(135deg, #fff 0%, #fff9f4 100%); 
+            border: 1px solid #ffe5d9; 
+        }
+        .final-amount { font-size: 22px; font-weight: 700; color: #333; text-align: right; }
+
+        /* MODAL MENU */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 100;
+            display: flex; align-items: flex-end;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            backdrop-filter: blur(2px);
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal-sheet {
+            background: white; width: 100%;
+            border-top-left-radius: 30px; border-top-right-radius: 30px;
+            padding: 30px 25px 40px 25px;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
+        }
+        .modal-overlay.active .modal-sheet { transform: translateY(0); }
+
+        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .sheet-title { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+        
+        .menu-list { list-style: none; }
+        .menu-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer;
+        }
+        .menu-select { color: var(--accent-color); font-weight: 700; font-size: 14px; }
+        .hidden { display: none !important; }
+
+        /* Animation */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: slideUp 0.4s ease-out forwards; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="nav-top">
+                <a href="index.html" class="icon-btn">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>
+                </a>
+                
+                <!-- Menu Toggle -->
+                <button class="icon-btn" id="menuBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="header-title">
+                <h1>Kalkulator Dropship</h1>
+                <p>Hitung Laba Bersih & Admin Fee</p>
+                <div class="mode-badge" id="modeBadge">Mode Input: Persen %</div>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content-scroll-area">
+            <div class="content-inner">
+                
+                <!-- Result Section -->
+                <div class="card fade-in" style="animation-delay: 0.1s;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF9A62" stroke="none"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                            Total Laba Bersih
+                        </div>
+                    </div>
+
+                    <!-- Profit Display -->
+                    <div class="result-display">
+                        <div class="result-bar" id="resultBar"></div>
+                        <span class="total-text" id="netProfitText">Rp 0</span>
+                    </div>
+
+                    <div class="stats-row">
+                        <!-- Stat 1: Markup -->
+                        <div class="stat-item">
+                            <div class="circle-chart" id="circleMarkup">
+                                <div class="circle-inner" id="markupInfoText">0%</div>
+                            </div>
+                            <span class="stat-label">Markup</span>
+                        </div>
+                        
+                        <!-- Stat 2: Admin Fee -->
+                        <div class="stat-item">
+                            <div class="circle-chart" id="circleAdmin" style="background: conic-gradient(#FF9F43 0%, #FFE5D9 0%);">
+                                <div class="circle-inner" id="adminInfoText">0%</div>
+                            </div>
+                            <span class="stat-label">Biaya Admin</span>
+                        </div>
+
+                         <!-- Stat 3: Selling Price -->
+                         <div class="stat-item">
+                            <div class="circle-chart" style="background: conic-gradient(#888 100%, #FFE5D9 0%);">
+                                <div class="circle-inner">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                                </div>
+                            </div>
+                            <span class="stat-label">Jual</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Section -->
+                <div class="card fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF9A62" stroke="none"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                            Data Produk
+                        </div>
+                    </div>
+
+                    <div class="input-card-group">
+                        <!-- Base Price -->
+                        <div class="input-box">
+                            <label class="input-label">Harga Dasar (Modal)</label>
+                            <div class="input-row">
+                                <span class="currency-symbol">Rp</span>
+                                <input type="number" id="basePriceInput" class="modern-input" placeholder="50000" inputmode="numeric">
+                            </div>
+                        </div>
+
+                        <!-- INPUT VARIANT 1: Percent Markup -->
+                        <div class="input-box" id="inputBoxPercent">
+                            <label class="input-label">Ingin Markup Berapa? (Persen)</label>
+                            <div class="input-row">
+                                <span class="percent-symbol">%</span>
+                                <input type="number" id="markupInputPercent" class="modern-input" placeholder="20.0" step="0.1" inputmode="decimal">
+                            </div>
+                        </div>
+
+                        <!-- INPUT VARIANT 2: Nominal Markup -->
+                        <div class="input-box hidden" id="inputBoxNominal">
+                            <label class="input-label">Ingin Markup Berapa? (Rupiah)</label>
+                            <div class="input-row">
+                                <span class="currency-symbol">Rp</span>
+                                <input type="number" id="markupInputNominal" class="modern-input" placeholder="15000" inputmode="numeric">
+                            </div>
+                        </div>
+
+                        <!-- INPUT ADMIN FEE (NEW) -->
+                        <div class="input-box">
+                            <label class="input-label">Biaya Admin Marketplace (%)</label>
+                            <div class="input-row">
+                                <span class="percent-symbol">%</span>
+                                <input type="number" id="adminFeeInput" class="modern-input" placeholder="4.0" step="0.1" inputmode="decimal">
+                            </div>
+                            <div class="input-helper">
+                                * Biaya admin Shopee, Lazada, Tokopedia kisaran 4-11% tergantung kategori & status toko.
+                            </div>
+                        </div>
+
+                        <!-- Selling Price Result -->
+                        <div class="input-box final-result-box">
+                            <label class="input-label">Harga Jual (Pasang di Toko)</label>
+                            <div class="final-amount" id="sellingPriceText">Rp 0</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- MENU MODAL (Hanya untuk ganti mode Markup) -->
+        <div class="modal-overlay" id="menuModal">
+            <div class="modal-sheet">
+                <div class="sheet-header">
+                    <h3 class="sheet-title">Pengaturan</h3>
+                    <div style="padding:10px; cursor:pointer;" id="closeMenuBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </div>
+                </div>
+                
+                <ul class="menu-list">
+                    <li class="menu-item" id="optMode">
+                        <div>
+                            <div class="menu-label">Mode Input Markup</div>
+                            <div class="menu-sub">Pilih cara hitung laba (Persen/Rupiah)</div>
+                        </div>
+                        <div class="menu-select" id="modeLabel">PERSEN (%)</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // State Application
+        let state = {
+            inputMode: 'percent' // 'percent' atau 'nominal'
+        };
+
+        // DOM Elements
+        const basePriceInput = document.getElementById('basePriceInput');
+        const markupInputPercent = document.getElementById('markupInputPercent');
+        const markupInputNominal = document.getElementById('markupInputNominal');
+        const adminFeeInput = document.getElementById('adminFeeInput'); // New Input
+
+        const inputBoxPercent = document.getElementById('inputBoxPercent');
+        const inputBoxNominal = document.getElementById('inputBoxNominal');
+
+        const netProfitText = document.getElementById('netProfitText');
+        const resultBar = document.getElementById('resultBar');
+        const sellingPriceText = document.getElementById('sellingPriceText');
+        
+        // Charts
+        const circleMarkup = document.getElementById('circleMarkup');
+        const markupInfoText = document.getElementById('markupInfoText');
+        const circleAdmin = document.getElementById('circleAdmin');
+        const adminInfoText = document.getElementById('adminInfoText');
+
+        const modeBadge = document.getElementById('modeBadge');
+
+        // Modal
+        const menuBtn = document.getElementById('menuBtn');
+        const menuModal = document.getElementById('menuModal');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+        const optMode = document.getElementById('optMode');
+        const modeLabel = document.getElementById('modeLabel');
+
+        // Formatter
+        const formatRupiah = (num) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+        };
+
+        // --- CORE CALCULATION ---
+        function calculate() {
+            let modal = parseFloat(basePriceInput.value) || 0;
+            let adminFeePercent = parseFloat(adminFeeInput.value) || 0;
+            
+            let sellingPrice = 0;
+            let grossMarkup = 0; // Selisih Harga Jual - Modal (Belum potong admin)
+
+            // 1. Hitung Harga Jual berdasarkan Mode Input
+            if (state.inputMode === 'percent') {
+                let markupPercent = parseFloat(markupInputPercent.value) || 0;
+                grossMarkup = modal * (markupPercent / 100);
+                sellingPrice = modal + grossMarkup;
+                
+                // Chart Update
+                markupInfoText.innerText = markupPercent + "%";
+                let deg = markupPercent * 3.6;
+                circleMarkup.style.background = `conic-gradient(#FF6B6B ${deg}deg, #FFE5D9 ${deg}deg)`;
+
+            } else { // Mode Nominal
+                let nominalTarget = parseFloat(markupInputNominal.value) || 0;
+                grossMarkup = nominalTarget;
+                sellingPrice = modal + grossMarkup;
+
+                // Hitung persentase implisit untuk chart
+                let impliedPercent = (modal > 0) ? (grossMarkup / modal) * 100 : 0;
+                markupInfoText.innerText = (grossMarkup >= 1000000 ? (grossMarkup/1000000).toFixed(1)+'jt' : (grossMarkup/1000).toFixed(0)+'k');
+                let deg = impliedPercent * 3.6;
+                circleMarkup.style.background = `conic-gradient(#FF6B6B ${deg}deg, #FFE5D9 ${deg}deg)`;
+            }
+
+            // 2. Hitung Biaya Admin (Berdasarkan Harga Jual)
+            // Rumus Marketplace: Admin Fee = Harga Jual * %
+            let adminCost = sellingPrice * (adminFeePercent / 100);
+
+            // 3. Hitung Laba Bersih
+            // Laba Bersih = (Harga Jual - Modal) - Biaya Admin
+            let netProfit = (sellingPrice - modal) - adminCost;
+
+            // --- UPDATE UI ---
+            sellingPriceText.innerText = formatRupiah(sellingPrice);
+            netProfitText.innerText = formatRupiah(netProfit);
+
+            // Admin Chart Update
+            adminInfoText.innerText = adminFeePercent + "%";
+            let adminDeg = adminFeePercent * 3.6 * 5; // Dikali 5 biar kelihatan jelas di grafik
+            circleAdmin.style.background = `conic-gradient(#FF9F43 ${adminDeg}deg, #FFE5D9 ${adminDeg}deg)`;
+
+            // Visual Bar Logic
+            resultBar.classList.remove('loss');
+            netProfitText.classList.remove('loss');
+            
+            let visualPercent = 0;
+            if (modal > 0) {
+                // Bar penuh jika profit bersih 20% dari modal
+                visualPercent = (netProfit / modal) * 100 * 2; 
+            }
+
+            if (netProfit < 0) {
+                // RUGI
+                resultBar.classList.add('loss');
+                netProfitText.classList.add('loss');
+                visualPercent = 30; // Indikator rugi
+            }
+            
+            if(visualPercent > 100) visualPercent = 100;
+            if(sellingPrice === 0) visualPercent = 0;
+            resultBar.style.width = visualPercent + "%";
+
+            // Text Contrast
+            if (visualPercent > 70 && netProfit > 0) {
+                netProfitText.classList.add('text-white-contrast');
+            } else {
+                netProfitText.classList.remove('text-white-contrast');
+            }
+        }
+
+        // --- MENU LOGIC ---
+        
+        menuBtn.addEventListener('click', () => menuModal.classList.add('active'));
+        closeMenuBtn.addEventListener('click', () => menuModal.classList.remove('active'));
+        menuModal.addEventListener('click', (e) => {
+            if(e.target === menuModal) menuModal.classList.remove('active');
+        });
+
+        // Toggle Input Mode Option
+        optMode.addEventListener('click', () => {
+            if(state.inputMode === 'percent') {
+                state.inputMode = 'nominal';
+                modeLabel.innerText = "RUPIAH (Rp)";
+                modeBadge.innerText = "Mode Input: Rupiah (Rp)";
+                
+                inputBoxPercent.classList.add('hidden');
+                inputBoxNominal.classList.remove('hidden');
+
+            } else {
+                state.inputMode = 'percent';
+                modeLabel.innerText = "PERSEN (%)";
+                modeBadge.innerText = "Mode Input: Persen (%)";
+                
+                inputBoxPercent.classList.remove('hidden');
+                inputBoxNominal.classList.add('hidden');
+            }
+            calculate();
+        });
+
+        // Input Listeners
+        basePriceInput.addEventListener('input', calculate);
+        markupInputPercent.addEventListener('input', calculate);
+        markupInputNominal.addEventListener('input', calculate);
+        adminFeeInput.addEventListener('input', calculate);
+
+        // Init Default Value
+        basePriceInput.value = 50000;
+        markupInputPercent.value = 25; // Markup awal 25%
+        adminFeeInput.value = 4;       // Default admin fee 4%
+        calculate();
+
+    </script>
+</body>
+</html>

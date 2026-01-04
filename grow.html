@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sales Growth Kalkulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette Modern Oren */
+            --primary-orange: #FF6B4A;
+            --soft-orange: #FFF2EE;
+            --gradient-orange: linear-gradient(135deg, #FF8E71 0%, #FF6B4A 100%);
+            
+            /* Background & Surface */
+            --bg-body: #F4F6F9;
+            --card-shadow: 0 12px 30px rgba(223, 115, 87, 0.08);
+            
+            /* Text */
+            --text-main: #2D3436;
+            --text-sub: #9EA5B1;
+
+            /* Result Colors */
+            --success: #2ECC71;
+            --danger: #FF4757;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #F0F2F5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Mobile Container */
+        .app-container {
+            width: 100%;
+            max-width: 414px;
+            background-color: #FAFAFA;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 450px) {
+            .app-container {
+                height: 92vh;
+                border-radius: 45px;
+                border: 8px solid #FFF;
+                overflow: hidden;
+            }
+        }
+
+        /* HEADER SECTION */
+        .header {
+            padding: 30px 25px 40px 25px;
+            background: var(--gradient-orange);
+            color: white;
+            flex-shrink: 0;
+            border-bottom-left-radius: 35px;
+            border-bottom-right-radius: 35px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 5px 20px rgba(255, 107, 74, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none;
+            backdrop-filter: blur(5px);
+            transition: 0.2s;
+        }
+        .back-btn:active { transform: scale(0.95); }
+        .back-btn svg { width: 20px; height: 20px; stroke: white; stroke-width: 2.5; fill: none; }
+
+        .header-title h1 { font-size: 20px; font-weight: 700; line-height: 1.2; }
+        .header-title p { font-size: 12px; opacity: 0.9; font-weight: 500; }
+
+        /* CONTENT AREA */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            margin-top: -30px; /* Overlap effect */
+            z-index: 20;
+            scrollbar-width: none;
+        }
+        .content-area::-webkit-scrollbar { display: none; }
+
+        /* MAIN CARD (Layout sesuai SS) */
+        .main-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 1. Header Card (Title & Badge) */
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-label h3 {
+            font-size: 16px; font-weight: 800; color: var(--text-main);
+        }
+        .card-label p {
+            font-size: 11px; color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;
+        }
+        
+        /* Badge Persentase Kecil di kanan atas */
+        .growth-badge {
+            background: #E9FBF0;
+            color: var(--success);
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .growth-badge.down {
+            background: #FFF0F1; color: var(--danger);
+        }
+
+        /* 2. Info Box (Kotak Abu dengan garis oren) */
+        .info-banner {
+            background: #F8F9FB;
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+            border-left: 4px solid var(--primary-orange);
+        }
+
+        /* 3. Input Grid (Side by Side) */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .input-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        .modern-input {
+            width: 100%;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            outline: none;
+            transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .modern-input:focus {
+            border-color: var(--primary-orange);
+            box-shadow: 0 4px 10px rgba(255, 107, 74, 0.15);
+        }
+
+        /* 4. Result Bar (Kotak Hitam Bawah) */
+        .black-result-box {
+            background: #1E1E1E;
+            border-radius: 16px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            margin-top: 5px;
+        }
+
+        .result-label {
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .result-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--success); /* Default Green */
+        }
+        .result-value.down { color: var(--danger); }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate { animation: fadeInUp 0.5s ease-out forwards; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <a href="index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <div class="header-title">
+                    <h1>Sales Growth</h1>
+                    <p>Analisa Pertumbuhan</p>
+                </div>
+            </div>
+            
+            <!-- Icon Decoration -->
+            <div style="opacity:0.8;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content-area">
+            
+            <div class="main-card animate">
+                
+                <!-- 1. Title & Top Badge -->
+                <div class="card-top">
+                    <div class="card-label">
+                        <h3>Sales Growth (MoM)</h3>
+                        <p>PERFORMA BULANAN</p>
+                    </div>
+                    <div class="growth-badge" id="topBadge">
+                        0%
+                        <!-- Arrow Icon dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- 2. Info Description -->
+                <div class="info-banner">
+                    Menghitung persentase pertumbuhan (atau penurunan) penjualan dibanding bulan lalu.
+                </div>
+
+                <!-- 3. Inputs (Side by Side) -->
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label class="input-label">Sales Bulan Ini</label>
+                        <input type="number" id="currentInput" class="modern-input" placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Sales Bulan Lalu</label>
+                        <input type="number" id="lastInput" class="modern-input" placeholder="0">
+                    </div>
+                </div>
+
+                <!-- 4. Result (Black Box) -->
+                <div class="black-result-box">
+                    <span class="result-label">Hasil Perhitungan:</span>
+                    <span class="result-value" id="resultText">0%</span>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const currentInput = document.getElementById('currentInput');
+        const lastInput = document.getElementById('lastInput');
+        const topBadge = document.getElementById('topBadge');
+        const resultText = document.getElementById('resultText');
+
+        function calculate() {
+            let current = parseFloat(currentInput.value);
+            let last = parseFloat(lastInput.value);
+
+            // Validasi Input
+            if(isNaN(current)) current = 0;
+            if(isNaN(last)) last = 0;
+
+            let growth = 0;
+            let isValid = true;
+
+            // Logic Perhitungan Growth
+            if (last === 0) {
+                if (current > 0) {
+                    growth = 100; // Tumbuh dari 0
+                } else if (current === 0) {
+                    growth = 0;
+                } else {
+                    growth = 0; // Tidak valid secara bisnis biasanya
+                }
+            } else {
+                // Rumus: ((Sekarang - Lalu) / Lalu) * 100
+                growth = ((current - last) / last) * 100;
+            }
+
+            // Formatting Teks
+            let formattedGrowth = growth.toFixed(1);
+            if(growth % 1 === 0) formattedGrowth = growth.toFixed(0); // Hilangkan desimal jika bulat
+            
+            let sign = growth > 0 ? "+" : "";
+            let textOutput = `${sign}${formattedGrowth}%`;
+
+            // Styling Logic (Green for Profit, Red for Loss)
+            if (growth >= 0) {
+                // POSITIVE
+                topBadge.classList.remove('down');
+                resultText.classList.remove('down');
+                
+                // Icon Up
+                topBadge.innerHTML = `${textOutput} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+                resultText.innerText = textOutput;
+
+            } else {
+                // NEGATIVE
+                topBadge.classList.add('down');
+                resultText.classList.add('down');
+
+                // Icon Down
+                topBadge.innerHTML = `${textOutput} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                resultText.innerText = textOutput;
+            }
+        }
+
+        // Event Listeners
+        currentInput.addEventListener('input', calculate);
+        lastInput.addEventListener('input', calculate);
+
+        // Init Value sesuai SS
+        currentInput.value = 100000;
+        lastInput.value = 200000;
+        calculate();
+
+    </script>
+</body>
+</html>

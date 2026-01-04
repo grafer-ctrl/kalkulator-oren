@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kalkulator Komisi Modern</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #FFB786 0%, #FF8675 100%);
+            --accent-color: #FF6B6B;
+            --bg-color: #FFF9F4;
+            --card-bg: #FFFFFF;
+            --text-dark: #333333;
+            --text-light: #888888;
+            --shadow-soft: 0 10px 30px rgba(255, 126, 95, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--bg-color);
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 450px) {
+            .app-container {
+                border-radius: 40px;
+                height: 90vh;
+                margin: 20px;
+                overflow: hidden;
+            }
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--primary-gradient);
+            padding: 30px 25px 50px 25px;
+            color: white;
+            flex-shrink: 0;
+            border-bottom-left-radius: 35px;
+            border-bottom-right-radius: 35px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            text-decoration: none;
+            transition: transform 0.2s, background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.3); }
+        .icon-btn svg { stroke: white; width: 18px; height: 18px; }
+
+        .header-title h1 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+        .header-title p { font-size: 13px; opacity: 0.9; }
+
+        /* CONTENT */
+        .content-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+            margin-top: -40px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-scroll-area::-webkit-scrollbar { width: 0px; }
+        .content-inner { padding: 0 20px; }
+
+        /* CARDS */
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 15px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        /* RESULT BAR */
+        .result-display {
+            background-color: #FFF0EB;
+            border-radius: 16px;
+            height: 55px;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-bar {
+            background: linear-gradient(90deg, #FF6B6B 0%, #FF8E53 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 16px;
+            position: absolute;
+            left: 0; top: 0; z-index: 1;
+        }
+
+        .total-commission-text {
+            position: absolute;
+            right: 20px;
+            z-index: 2;
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 18px;
+            white-space: nowrap;
+            transition: color 0.3s;
+        }
+        .text-white-contrast { color: white !important; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+        /* STATS */
+        .stats-row { display: flex; justify-content: space-around; text-align: center; }
+        .stat-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        
+        .circle-chart {
+            width: 55px; height: 55px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: conic-gradient(var(--accent-color) 0%, #FFE5D9 0%);
+            transition: background 0.3s;
+        }
+        .circle-inner {
+            width: 42px; height: 42px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: var(--accent-color);
+        }
+        .stat-label { font-size: 11px; color: var(--text-light); }
+
+        /* INPUTS */
+        .input-card-group { display: flex; flex-direction: column; gap: 12px; }
+        .input-box {
+            background-color: #FFF6F0; border-radius: 16px; padding: 15px;
+            border: 1px solid transparent; transition: border-color 0.3s;
+        }
+        .input-box:focus-within { border-color: #FFB786; }
+        .input-label { font-size: 12px; color: var(--text-light); margin-bottom: 5px; display: block; }
+        .input-row { display: flex; align-items: center; justify-content: space-between; }
+        
+        .currency-symbol, .percent-symbol { font-weight: 600; color: var(--text-dark); font-size: 16px; }
+        .modern-input {
+            width: 100%; background: transparent; border: none;
+            text-align: right; font-size: 18px; font-weight: 600;
+            color: var(--text-dark); outline: none; padding: 0 10px;
+        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .net-result-box { background: linear-gradient(135deg, #fff 0%, #fff9f4 100%); border: 1px solid #ffe5d9; }
+        .net-amount { font-size: 22px; font-weight: 700; color: #333; text-align: right; }
+
+        /* MODAL SETTINGS */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            backdrop-filter: blur(3px);
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal-box {
+            background: white; width: 80%; max-width: 300px;
+            padding: 25px; border-radius: 24px;
+            text-align: center; transform: scale(0.8); transition: transform 0.3s;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        
+        .modal-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; }
+        
+        .tax-options { display: flex; gap: 15px; justify-content: center; }
+        .tax-btn {
+            flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #eee;
+            background: white; color: var(--text-light); font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .tax-btn.active {
+            border-color: var(--accent-color);
+            background: #FFF0EB; color: var(--accent-color);
+        }
+
+        /* Animations */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: slideUp 0.4s ease-out forwards; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="nav-top">
+                <a href="index.html" class="icon-btn back-btn">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>
+                </a>
+                
+                <!-- Settings Button -->
+                <button class="icon-btn" id="settingsBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 5 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="header-title">
+                <h1>Kalkulator Komisi</h1>
+                <p>Tracker Penghasilan Harian</p>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content-scroll-area">
+            <div class="content-inner">
+                
+                <!-- Result Section -->
+                <div class="card fade-in" style="animation-delay: 0.1s;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF9A62" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05 1.18 1.91 2.53 1.91 1.29 0 2.13-.77 2.13-2.12 0-2.04-2.58-2.17-4.33-2.67C8.16 11.3 6.99 10.3 6.99 8.23c0-1.78 1.45-3.08 3.25-3.32V3h2.67v1.93c1.61.35 2.89 1.5 3.02 3.17h-1.92c-.12-.82-.92-1.63-2.22-1.63-1.07 0-1.92.74-1.92 1.8 0 1.68 2.59 1.91 4.34 2.55 1.86.67 3.07 1.82 3.07 3.93 0 1.92-1.56 3.17-3.28 3.34z"/></svg>
+                            Estimasi Kotor
+                        </div>
+                    </div>
+
+                    <div class="result-display">
+                        <div class="result-bar" id="resultBar"></div>
+                        <span class="total-commission-text" id="totalCommission">Rp 0</span>
+                    </div>
+
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="circle-chart" id="circleRate">
+                                <div class="circle-inner" id="rateText">0%</div>
+                            </div>
+                            <span class="stat-label">Rate</span>
+                        </div>
+                        <div class="stat-item">
+                            <!-- Tax Circle -->
+                            <div class="circle-chart" id="circleTax" style="background: conic-gradient(#FF9F43 10%, #FFE5D9 10%);">
+                                <div class="circle-inner" id="taxText">10%</div>
+                            </div>
+                            <span class="stat-label">Pajak</span>
+                        </div>
+                        <div class="stat-item">
+                            <div class="circle-chart" id="circleNet">
+                                <div class="circle-inner" id="netPercentText">90%</div>
+                            </div>
+                            <span class="stat-label">Bersih</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Section -->
+                <div class="card fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF9A62" stroke="none"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2.41.89-2.41 2L3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                            Input Data
+                        </div>
+                    </div>
+
+                    <div class="input-card-group">
+                        <div class="input-box">
+                            <label class="input-label">Harga Produk</label>
+                            <div class="input-row">
+                                <span class="currency-symbol">Rp</span>
+                                <input type="number" id="priceInput" class="modern-input" placeholder="0" inputmode="numeric">
+                            </div>
+                        </div>
+
+                        <div class="input-box">
+                            <label class="input-label">Komisi (%)</label>
+                            <div class="input-row">
+                                <span class="percent-symbol">%</span>
+                                <input type="number" id="percentInput" class="modern-input" placeholder="5.0" step="0.1" inputmode="decimal">
+                            </div>
+                        </div>
+
+                        <div class="input-box net-result-box">
+                            <label class="input-label">Penghasilan Bersih (Net)</label>
+                            <div class="net-amount" id="netAmount">Rp 0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL SETTINGS (Hidden by default) -->
+        <div class="modal-overlay" id="settingsModal">
+            <div class="modal-box">
+                <h3 class="modal-title">Atur Besaran Pajak</h3>
+                <div class="tax-options">
+                    <button class="tax-btn active" onclick="setTax(0.10, this)">10%</button>
+                    <button class="tax-btn" onclick="setTax(0.11, this)">11%</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const priceInput = document.getElementById('priceInput');
+        const percentInput = document.getElementById('percentInput');
+        const totalCommissionText = document.getElementById('totalCommission');
+        const resultBar = document.getElementById('resultBar');
+        const netAmountText = document.getElementById('netAmount');
+        const circleRate = document.getElementById('circleRate');
+        const rateText = document.getElementById('rateText');
+        const circleNet = document.getElementById('circleNet');
+        const netPercentText = document.getElementById('netPercentText');
+        const circleTax = document.getElementById('circleTax');
+        const taxText = document.getElementById('taxText');
+        
+        // Modal Elements
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+
+        // State Global
+        let currentTaxRate = 0.10; // Default 10%
+
+        // Formatter Mata Uang
+        const formatRupiah = (num) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                maximumFractionDigits: 0
+            }).format(num);
+        };
+
+        // Fungsi Kalkulasi Utama
+        function calculate() {
+            let price = parseFloat(priceInput.value);
+            let percent = parseFloat(percentInput.value);
+
+            if (isNaN(price)) price = 0;
+            if (isNaN(percent)) percent = 0;
+
+            // Logika Bisnis
+            let commission = price * (percent / 100);
+            let taxAmount = commission * currentTaxRate;
+            let netIncome = commission - taxAmount;
+
+            // Update Text UI
+            totalCommissionText.innerText = formatRupiah(commission);
+            netAmountText.innerText = formatRupiah(netIncome);
+            rateText.innerText = percent + "%";
+
+            // Visual Progress Bar
+            let visualPercent = percent * 5; 
+            if(visualPercent > 100) visualPercent = 100;
+            if(price === 0) visualPercent = 0;
+            resultBar.style.width = visualPercent + "%";
+
+            if (visualPercent > 70) {
+                totalCommissionText.classList.add('text-white-contrast');
+            } else {
+                totalCommissionText.classList.remove('text-white-contrast');
+            }
+
+            // Update Charts
+            let rateDeg = percent * 3.6;
+            circleRate.style.background = `conic-gradient(#FF6B6B ${rateDeg}deg, #FFE5D9 ${rateDeg}deg)`;
+
+            // Update Tax Chart (Visual sesuai setting)
+            let taxPercentDisplay = currentTaxRate * 100;
+            let taxDeg = taxPercentDisplay * 3.6;
+            circleTax.style.background = `conic-gradient(#FF9F43 ${taxDeg}deg, #FFE5D9 ${taxDeg}deg)`;
+            taxText.innerText = taxPercentDisplay + "%";
+
+            // Update Net Chart (Sisa dari pajak)
+            // Jika komisi 0, chart net kosong
+            let netPercent = 100 - (currentTaxRate * 100);
+            let netDeg = (commission > 0) ? netPercent * 3.6 : 0;
+            
+            circleNet.style.background = `conic-gradient(#FF8E53 ${netDeg}deg, #FFE5D9 ${netDeg}deg)`;
+            netPercentText.innerText = netPercent + "%";
+        }
+
+        // Logic Modal Settings
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.classList.add('active');
+        });
+
+        settingsModal.addEventListener('click', (e) => {
+            // Tutup jika klik area gelap (bukan kotaknya)
+            if(e.target === settingsModal) {
+                settingsModal.classList.remove('active');
+            }
+        });
+
+        function setTax(rate, btnElement) {
+            currentTaxRate = rate;
+            
+            // Update visual tombol aktif
+            document.querySelectorAll('.tax-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Hitung ulang dan tutup modal
+            calculate();
+            setTimeout(() => {
+                settingsModal.classList.remove('active');
+            }, 150);
+        }
+
+        // Event Listeners Input
+        priceInput.addEventListener('input', calculate);
+        percentInput.addEventListener('input', calculate);
+
+        // Init Default
+        percentInput.value = 5;
+        calculate();
+    </script>
+</body>
+</html>
